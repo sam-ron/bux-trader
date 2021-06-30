@@ -4,7 +4,7 @@ package com.bux.trader.entity.rest;
 public class TradeQuote {
 
     private String securityId;
-    private String currentPrice;
+    private Float currentPrice;
 
     public String getSecurityId() {
         return securityId;
@@ -14,12 +14,12 @@ public class TradeQuote {
         this.securityId = securityId;
     }
 
-    public String getCurrentPrice() {
+    public Float getCurrentPrice() {
         return currentPrice;
     }
 
     public void setCurrentPrice(String currentPrice) {
-        this.currentPrice = currentPrice;
+        this.currentPrice = Float.parseFloat(currentPrice);
     }
 
 }

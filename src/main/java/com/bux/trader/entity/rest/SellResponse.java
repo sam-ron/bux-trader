@@ -1,9 +1,10 @@
 package com.bux.trader.entity.rest;
 
-public class BuyResponse {
+public class SellResponse {
     private String id;
-    private String positionId;
+    private String position;
     private Product product;
+    private Amount profitLoss;
     private Amount amount;
     private Amount price;
     private Integer leverage;
@@ -19,12 +20,12 @@ public class BuyResponse {
         this.id = id;
     }
 
-    public String getPositionId() {
-        return positionId;
+    public String getPosition() {
+        return position;
     }
 
-    public void setPositionId(String positionId) {
-        this.positionId = positionId;
+    public void setPosition(String position) {
+        this.position = position;
     }
 
     public Product getProduct() {
@@ -81,5 +82,13 @@ public class BuyResponse {
 
     public void setDateCreated(Long dateCreated) {
         this.dateCreated = dateCreated;
+    }
+
+    public Amount getProfitLoss() {
+        return profitLoss;
+    }
+
+    public void setProfitLoss(Amount profitLoss) {
+        this.profitLoss = profitLoss;
     }
 }

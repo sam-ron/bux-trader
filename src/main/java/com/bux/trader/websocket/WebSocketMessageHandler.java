@@ -25,27 +25,25 @@ public class WebSocketMessageHandler {
     @Autowired
     private TradeService tradeService;
 
+    private boolean recheckPosition = true;
+
     public void handleMessage(JsonObject jsonObject, Session session) {
         JsonElement jsonElement = jsonObject.get("t");
         if (jsonElement == null) {
             return;
         }
-
         String t = jsonElement.getAsString();
 
-//        System.out.println(t);
-
-//        JsonElement body = jsonObject.get("body");
-//        System.out.println(body);
-
         if (CONNECT_CONNECTED.equals(t)) {
-            subscriptionService.SubscribeToProductChannel(session);
+            subscriptionService.subscribeToProductChannel(session);
         }
-
         if (TRADING_QUOTE.equals(t)) {
             TradeQuote tradeQuote = gson.fromJson(jsonObject.get("body"), TradeQuote.class);
-            System.out.println("TRADING_QUOTE RECEIVED");
-            tradeService.processQuote(tradeQuote);
+            recheckPosition = tradeService.processQuote(tradeQuote);
+            if(!recheckPosition){
+                System.out.println("Unsubscribing");
+                subscriptionService.unsubscribeFromProductChannel(session);
+            }
         }
 
     }

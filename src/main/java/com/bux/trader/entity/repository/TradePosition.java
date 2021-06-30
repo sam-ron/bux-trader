@@ -6,8 +6,9 @@ import javax.persistence.*;
 public class TradePosition {
 
     @Id
+    private String positionId;
     private String productId;
-    private String buyPrice;
+    private Float buyPrice;
     private Float upperLimit;
     private Float lowerLimit;
 
@@ -15,13 +16,21 @@ public class TradePosition {
 
     }
 
-    public TradePosition(String productId, String buyPrice, Float upperLimit, Float lowerLimit) {
+    public TradePosition(String productId, Float buyPrice, Float upperLimit, Float lowerLimit) {
         this.productId = productId;
         this.buyPrice = buyPrice;
         this.upperLimit = upperLimit;
         this.lowerLimit = lowerLimit;
     }
 
+
+    public String getPositionId() {
+        return positionId;
+    }
+
+    public void setPositionId(String positionId) {
+        this.positionId = positionId;
+    }
 
     public String getProductId() {
         return productId;
@@ -31,11 +40,11 @@ public class TradePosition {
         this.productId = productId;
     }
 
-    public String getBuyPrice() {
+    public Float getBuyPrice() {
         return buyPrice;
     }
 
-    public void setBuyPrice(String buyPrice) {
+    public void setBuyPrice(Float buyPrice) {
         this.buyPrice = buyPrice;
     }
 

@@ -31,6 +31,4 @@ public class WebSocketEndpoint extends Endpoint{
         };
         session.addMessageHandler(messageHandler);
     }
-
-
 }
