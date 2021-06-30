@@ -1,7 +1,7 @@
-package com.bux.trader.entity;
+package com.bux.trader.entity.rest;
 
 
-public class TradingQuote {
+public class TradeQuote {
 
     private String securityId;
     private String currentPrice;

@@ -1,11 +1,10 @@
-package com.bux.trader.service.rest;
+package com.bux.trader.service;
 
-import com.bux.trader.entity.TradingQuote;
-import com.bux.trader.service.rest.entity.*;
+import com.bux.trader.entity.rest.TradeQuote;
+import com.bux.trader.entity.rest.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -14,7 +13,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Collections;
 
 @Service
-public class TradingService {
+public class TradeService {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
@@ -45,26 +44,27 @@ public class TradingService {
         return restTemplate;
     }
 
-    public void readQuote(TradingQuote tradingQuote){
+    public void processQuote(TradeQuote tradeQuote){
+        String productId = tradeQuote.getSecurityId();
         System.out.println("readQuote");
         if(!tradeActive){
-            buy(tradingQuote);
-            logger.info("Successfully bought at: " + tradingQuote.getCurrentPrice());
+            buy(tradeQuote);
+            logger.info("Successfully bought at: " + tradeQuote.getCurrentPrice());
         }
 
     }
 
-    private BuyResponse buy(TradingQuote tradingQuote){
+    private BuyResponse buy(TradeQuote tradeQuote){
         System.out.println("buy");
-        BuyRequest request = createBuyRequest(tradingQuote);
+        BuyRequest request = createBuyRequest(tradeQuote);
         ResponseEntity<BuyResponse> response = restTemplate().postForEntity(buyUrl, request, BuyResponse.class);
         System.out.println(response.getStatusCode());
         return response.getBody();
     }
 
-    private BuyRequest createBuyRequest(TradingQuote tradingQuote){
+    private BuyRequest createBuyRequest(TradeQuote tradeQuote){
         BuyRequest request = new BuyRequest();
-        request.setProductId(tradingQuote.getSecurityId());
+        request.setProductId(tradeQuote.getSecurityId());
         request.setInvestingAmount(new Amount("BUX", 2, 10));
         request.setLeverage(2);
         request.setDirection(Direction.BUY);

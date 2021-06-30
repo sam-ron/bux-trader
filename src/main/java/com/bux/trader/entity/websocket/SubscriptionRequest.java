@@ -1,4 +1,4 @@
-package com.bux.trader.websocket.entity;
+package com.bux.trader.entity.websocket;
 
 public class SubscriptionRequest {
 

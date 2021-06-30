@@ -1,6 +1,6 @@
 package com.bux.trader.service;
 
-import com.bux.trader.websocket.entity.SubscriptionRequest;
+import com.bux.trader.entity.websocket.SubscriptionRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

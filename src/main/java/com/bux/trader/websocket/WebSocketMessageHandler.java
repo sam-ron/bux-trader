@@ -1,9 +1,8 @@
 package com.bux.trader.websocket;
 
-import com.bux.trader.entity.TradingQuote;
+import com.bux.trader.entity.rest.TradeQuote;
 import com.bux.trader.service.SubscriptionService;
-import com.bux.trader.service.rest.TradingService;
-import com.bux.trader.websocket.entity.SubscriptionRequest;
+import com.bux.trader.service.TradeService;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -24,7 +23,7 @@ public class WebSocketMessageHandler {
     private SubscriptionService subscriptionService;
 
     @Autowired
-    private TradingService tradingService;
+    private TradeService tradeService;
 
     public void handleMessage(JsonObject jsonObject, Session session) {
         JsonElement jsonElement = jsonObject.get("t");
@@ -34,19 +33,19 @@ public class WebSocketMessageHandler {
 
         String t = jsonElement.getAsString();
 
-        System.out.println(t);
+//        System.out.println(t);
 
-        JsonElement body = jsonObject.get("body");
-        System.out.println(body);
+//        JsonElement body = jsonObject.get("body");
+//        System.out.println(body);
 
         if (CONNECT_CONNECTED.equals(t)) {
             subscriptionService.SubscribeToProductChannel(session);
         }
 
         if (TRADING_QUOTE.equals(t)) {
-            TradingQuote tradingQuote = gson.fromJson(jsonObject.get("body"), TradingQuote.class);
+            TradeQuote tradeQuote = gson.fromJson(jsonObject.get("body"), TradeQuote.class);
             System.out.println("TRADING_QUOTE RECEIVED");
-            tradingService.readQuote(tradingQuote);
+            tradeService.processQuote(tradeQuote);
         }
 
     }
