@@ -1,11 +1,27 @@
-package com.bux.trader.entity;
+package com.bux.trader.entity.repository;
 
+import javax.persistence.*;
+
+@Entity
 public class TradePosition {
 
+    @Id
     private String productId;
-    private Float buyPrice;
+    private String buyPrice;
     private Float upperLimit;
     private Float lowerLimit;
+
+    public TradePosition() {
+
+    }
+
+    public TradePosition(String productId, String buyPrice, Float upperLimit, Float lowerLimit) {
+        this.productId = productId;
+        this.buyPrice = buyPrice;
+        this.upperLimit = upperLimit;
+        this.lowerLimit = lowerLimit;
+    }
+
 
     public String getProductId() {
         return productId;
@@ -15,11 +31,11 @@ public class TradePosition {
         this.productId = productId;
     }
 
-    public Float getBuyPrice() {
+    public String getBuyPrice() {
         return buyPrice;
     }
 
-    public void setBuyPrice(Float buyPrice) {
+    public void setBuyPrice(String buyPrice) {
         this.buyPrice = buyPrice;
     }
 
