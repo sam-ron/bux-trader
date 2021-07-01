@@ -1,5 +1,14 @@
 package com.bux.trader.entity.rest;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class BuyResponse {
     private String id;
     private String positionId;
@@ -11,75 +20,4 @@ public class BuyResponse {
     private String type;
     private Long dateCreated;
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getPositionId() {
-        return positionId;
-    }
-
-    public void setPositionId(String positionId) {
-        this.positionId = positionId;
-    }
-
-    public Product getProduct() {
-        return product;
-    }
-
-    public void setProduct(Product product) {
-        this.product = product;
-    }
-
-    public Amount getAmount() {
-        return amount;
-    }
-
-    public void setAmount(Amount amount) {
-        this.amount = amount;
-    }
-
-    public Amount getPrice() {
-        return price;
-    }
-
-    public void setPrice(Amount price) {
-        this.price = price;
-    }
-
-    public Integer getLeverage() {
-        return leverage;
-    }
-
-    public void setLeverage(Integer leverage) {
-        this.leverage = leverage;
-    }
-
-    public Direction getDirection() {
-        return direction;
-    }
-
-    public void setDirection(Direction direction) {
-        this.direction = direction;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public Long getDateCreated() {
-        return dateCreated;
-    }
-
-    public void setDateCreated(Long dateCreated) {
-        this.dateCreated = dateCreated;
-    }
 }

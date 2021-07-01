@@ -1,8 +1,16 @@
 package com.bux.trader.entity.repository;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.persistence.*;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
 public class TradePosition {
 
     @Id
@@ -12,10 +20,6 @@ public class TradePosition {
     private Float upperLimit;
     private Float lowerLimit;
 
-    public TradePosition() {
-
-    }
-
     public TradePosition(String productId, Float buyPrice, Float upperLimit, Float lowerLimit) {
         this.productId = productId;
         this.buyPrice = buyPrice;
@@ -23,44 +27,4 @@ public class TradePosition {
         this.lowerLimit = lowerLimit;
     }
 
-
-    public String getPositionId() {
-        return positionId;
-    }
-
-    public void setPositionId(String positionId) {
-        this.positionId = positionId;
-    }
-
-    public String getProductId() {
-        return productId;
-    }
-
-    public void setProductId(String productId) {
-        this.productId = productId;
-    }
-
-    public Float getBuyPrice() {
-        return buyPrice;
-    }
-
-    public void setBuyPrice(Float buyPrice) {
-        this.buyPrice = buyPrice;
-    }
-
-    public Float getUpperLimit() {
-        return upperLimit;
-    }
-
-    public void setUpperLimit(Float upperLimit) {
-        this.upperLimit = upperLimit;
-    }
-
-    public Float getLowerLimit() {
-        return lowerLimit;
-    }
-
-    public void setLowerLimit(Float lowerLimit) {
-        this.lowerLimit = lowerLimit;
-    }
 }

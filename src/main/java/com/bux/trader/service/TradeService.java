@@ -29,6 +29,10 @@ public class TradeService {
     @Value("${bux.trade.lower.limit}")
     private Float buyLowerLimit;
 
+    @Value("${bux.trade.buy.amount}")
+    private Float tradeSize;
+
+
     @Autowired
     private RestTemplate restTemplate;
 
@@ -98,16 +102,14 @@ public class TradeService {
         return response.getBody();
     }
 
-    //TODO use lombok builder - builder pattern - immutable
     private BuyRequest createBuyRequest(TradePosition tradePosition){
-        BuyRequest request = new BuyRequest();
-        request.setProductId(tradePosition.getProductId());
-        request.setInvestingAmount(new Amount("BUX", 2, 10));
-        request.setLeverage(2);
-        request.setDirection(Direction.BUY);
-        request.setSource(new Source("OTHER"));
-
-        return request;
+        return BuyRequest.builder()
+                .productId(tradePosition.getProductId())
+                .investingAmount(new Amount("BUX", 2, tradeSize))
+                .leverage(2)
+                .direction(Direction.BUY)
+                .source(new Source("OTHER"))
+                .build();
     }
 
     private String getBuyUrl(){
@@ -120,9 +122,5 @@ public class TradeService {
 
     private TradePosition createTradePosition(TradeQuote tradeQuote){
         return new TradePosition(tradeQuote.getSecurityId(), tradeQuote.getCurrentPrice(), buyUpperLimit, buyLowerLimit);
-    }
-
-    private boolean success(ResponseEntity response ){
-        return response.getStatusCode().equals(HttpStatus.OK);
     }
 }
