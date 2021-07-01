@@ -13,7 +13,7 @@ import java.io.IOException;
 @Service
 public class SubscriptionService {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass().getName());
+    private final Logger log = LoggerFactory.getLogger(this.getClass().getName());
 
     @Value("${bux.product.id}")
     private String productId;
@@ -21,20 +21,20 @@ public class SubscriptionService {
     public void subscribeToProductChannel(Session session){
         String subscribeRequest = new SubscriptionRequest(productId).toJson();
         try {
-            logger.info("Subscribing to product: " + productId);
+            log.info("Subscribing to product: " + productId);
             session.getBasicRemote().sendText(subscribeRequest);
         } catch (IOException e) {
-            logger.error("Error subscribing to channel for product:" + productId);
+            log.error("Error subscribing to channel for product:" + productId);
         }
     }
 
     public void unsubscribeFromProductChannel(Session session){
         String subscribeRequest = new UnsubscriptionRequest(productId).toJson();
         try {
-            logger.info("Unsubscribing from product: " + productId);
+            log.info("Unsubscribing from product: " + productId);
             session.getBasicRemote().sendText(subscribeRequest);
         } catch (IOException e) {
-            logger.error("Error unsubscribing to channel from product:" + productId);
+            log.error("Error unsubscribing to channel from product:" + productId);
         }
     }
 }

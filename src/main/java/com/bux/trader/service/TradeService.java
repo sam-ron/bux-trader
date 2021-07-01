@@ -1,5 +1,6 @@
 package com.bux.trader.service;
 
+import com.bux.trader.config.exception.PriceConfigurationException;
 import com.bux.trader.entity.repository.TradePosition;
 import com.bux.trader.entity.rest.TradeQuote;
 import com.bux.trader.entity.rest.*;
@@ -17,7 +18,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class TradeService {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass().getName());
+    private final Logger log = LoggerFactory.getLogger(this.getClass().getName());
 
     @Value("${bux.api.url}")
     private String apiUrl;
@@ -38,71 +39,60 @@ public class TradeService {
     private static final String SELL_ENDPOINT = "users/me/portfolio/positions/";
 
 
-    public boolean processQuote(TradeQuote tradeQuote){
-        System.out.println("here1");
-        // If there's no active trade on given product ID then create one
+    public boolean processQuote(TradeQuote tradeQuote) throws PriceConfigurationException{
+        // If there's no open trade on given product ID then open one
         if(tradeRepository.findByProductId(tradeQuote.getSecurityId()) == null){
-            System.out.println("checkingn db");
-            TradePosition tradePosition = new TradePosition(
-                    tradeQuote.getSecurityId(), tradeQuote.getCurrentPrice(), buyUpperLimit, buyLowerLimit);
-            System.out.println("NEW POSITION ID" + tradePosition.getPositionId());
+            TradePosition tradePosition = createTradePosition(tradeQuote);
             buyOrder(tradePosition);
         }
-        // If there is an active trade then determine next step
+        // If there is an open trade then determine how to proceed
         else{
-            System.out.println("Updated price " + tradeQuote.getCurrentPrice());
+            log.info("Trading quote received for product {}, updated price: {} ", tradeQuote.getSecurityId(), tradeQuote.getCurrentPrice());
             TradePosition tradePosition = tradeRepository.findByProductId(tradeQuote.getSecurityId());
-            System.out.println("trade active for " + tradePosition.getProductId() + " opened at " + tradePosition.getBuyPrice());
-            checkStatus(tradePosition, tradeQuote);
-            return false;
+            return checkStatus(tradePosition, tradeQuote);
         }
         return true;
     }
 
+    /**
+     * if the price is still within the threshold then return true to continue receiving quotes,
+     * otherwise price limits were exceeded, sell order and return false to stop receiving quotes
+     */
     private boolean checkStatus(TradePosition tradePosition, TradeQuote tradeQuote){
-        if(!tradePosition.getProductId().equals(tradeQuote.getSecurityId())){
-            System.out.println("ERROR. NOT EQUAL " + tradePosition.getProductId() + "/" + tradeQuote.getSecurityId());
-            return false;
+        if (tradeQuote.getCurrentPrice() > buyLowerLimit && tradeQuote.getCurrentPrice() < buyUpperLimit){
+            return true;
         }
         else{
-            if (tradeQuote.getCurrentPrice() >= buyLowerLimit && tradeQuote.getCurrentPrice() <= buyUpperLimit){
-                System.out.println("Not ready to sell");
-                return true;
-            }
-            else{
-                System.out.println("Sell");
-                sellOrder(tradePosition);
-                return false;
-            }
+            sellOrder(tradePosition);
+            return false;
         }
-
     }
 
      private BuyResponse buyOrder(TradePosition tradePosition){
-        System.out.println("buying");
+        if(buyLowerLimit >= buyUpperLimit){
+             throw new PriceConfigurationException("Buy/Sell limits are not configured correctly.");
+        }
+
         BuyRequest request = createBuyRequest(tradePosition);
         ResponseEntity<BuyResponse> response = restTemplate.postForEntity(getBuyUrl(), request, BuyResponse.class);
 
         if(response.getStatusCode().equals(HttpStatus.OK)){
-            System.out.println("INSERTING" + tradePosition.getBuyPrice() +"," +tradePosition.getProductId() + "," + tradePosition.getLowerLimit() );
             tradePosition.setPositionId(response.getBody().getPositionId());
-            System.out.println("RESPONSE POSITIONID:" + tradePosition.getPositionId());
             tradeRepository.save(tradePosition);
-            logger.info("Buy Order Successful. Product {}, Price {}  ",
-                    tradePosition.getProductId(), tradePosition.getBuyPrice());
+            log.info("Buy Order Successful. Product {}, Buy Price {}, Upper Limit {}, Lower Limit {}  ",
+                    tradePosition.getProductId(), tradePosition.getBuyPrice(), buyUpperLimit, buyLowerLimit);
         }
         return response.getBody();
     }
 
     private SellResponse sellOrder(TradePosition tradePosition){
-        System.out.println("selling:" + getSellUrl(tradePosition.getPositionId()));
         ResponseEntity<SellResponse> response = restTemplate.exchange(
                 getSellUrl(tradePosition.getPositionId()), HttpMethod.DELETE, null, SellResponse.class);
+
         //TODO API Exception handling
         if(response.getStatusCode().equals(HttpStatus.OK)){
-            System.out.println("SELLING" + tradePosition.getBuyPrice() +"," +tradePosition.getProductId() + "," + tradePosition.getLowerLimit() );
             tradeRepository.delete(tradePosition);
-            logger.info("Sell Order Successful. Product {}, Buy Price {} , Current Price {}",
+            log.info("Sell Order Successful. Product {}, Buy Price {} , Current Price {}",
                     tradePosition.getProductId(), tradePosition.getBuyPrice(), response.getBody().getPrice().getAmount());
         }
         return response.getBody();
@@ -125,8 +115,11 @@ public class TradeService {
     }
 
     private String getSellUrl(String positionId){
-        System.out.println("SELL URL POSITION ID: " + positionId);
         return apiUrl + SELL_ENDPOINT + positionId;
+    }
+
+    private TradePosition createTradePosition(TradeQuote tradeQuote){
+        return new TradePosition(tradeQuote.getSecurityId(), tradeQuote.getCurrentPrice(), buyUpperLimit, buyLowerLimit);
     }
 
     private boolean success(ResponseEntity response ){
