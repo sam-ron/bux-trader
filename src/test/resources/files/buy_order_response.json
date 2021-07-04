@@ -1,0 +1,18 @@
+{
+  "id": "98922f1a-4c10-4635-a9e6-ae19ddcd12b4",
+  "positionId": "4c58a0b2-ea78-46a0-ac21-5a8c22d527dc",
+  "product": {
+    "securityId": "testId",
+    "symbol": "testSymbol",
+    "displayName": "testName"
+},
+  "investingAmount": {
+    "currency": "BUX", "decimals": 2, "amount": "200.00"
+  }, "price": {
+  "currency": "EUR", "decimals": 3, "amount": "0.567"
+},
+  "leverage": 1,
+  "direction": "BUY",
+  "type": "OPEN",
+  "dateCreated": 1405515165705
+}

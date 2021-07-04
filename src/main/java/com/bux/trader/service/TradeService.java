@@ -1,9 +1,13 @@
 package com.bux.trader.service;
 
+import com.bux.trader.config.TradeConfig;
 import com.bux.trader.config.exception.PriceConfigurationException;
-import com.bux.trader.entity.repository.TradePosition;
-import com.bux.trader.entity.rest.TradeQuote;
-import com.bux.trader.entity.rest.*;
+import com.bux.trader.rest.controller.TradeController;
+import com.bux.trader.repository.entity.TradePosition;
+import com.bux.trader.rest.entity.BuyRequest;
+import com.bux.trader.rest.entity.BuyResponse;
+import com.bux.trader.rest.entity.SellResponse;
+import com.bux.trader.rest.entity.TradeQuote;
 import com.bux.trader.repository.TradeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,34 +17,20 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 @Service
 public class TradeService {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass().getName());
 
-    @Value("${bux.api.url}")
-    private String apiUrl;
-
-    @Value("${bux.trade.upper.limit}")
-    private Float buyUpperLimit;
-
-    @Value("${bux.trade.lower.limit}")
-    private Float buyLowerLimit;
-
-    @Value("${bux.trade.buy.amount}")
-    private Float tradeSize;
-
-
-    @Autowired
-    private RestTemplate restTemplate;
-
     @Autowired
     private TradeRepository tradeRepository;
 
-    private static final String BUY_ENDPOINT = "users/me/trades";
-    private static final String SELL_ENDPOINT = "users/me/portfolio/positions/";
+    @Autowired
+    private TradeController tradeController;
+
+    @Autowired
+    private TradeConfig tradeConfig;
 
 
     public boolean processQuote(TradeQuote tradeQuote) throws PriceConfigurationException{
@@ -63,7 +53,7 @@ public class TradeService {
      * otherwise price limits were exceeded, sell order and return false to stop receiving quotes
      */
     private boolean checkStatus(TradePosition tradePosition, TradeQuote tradeQuote){
-        if (tradeQuote.getCurrentPrice() > buyLowerLimit && tradeQuote.getCurrentPrice() < buyUpperLimit){
+        if (tradeQuote.getCurrentPrice() > tradeConfig.getBuyLowerLimit() && tradeQuote.getCurrentPrice() < tradeConfig.getBuyUpperLimit()){
             return true;
         }
         else{
@@ -72,55 +62,28 @@ public class TradeService {
         }
     }
 
-     private BuyResponse buyOrder(TradePosition tradePosition){
-        if(buyLowerLimit >= buyUpperLimit){
+     private void buyOrder(TradePosition tradePosition){
+        if(tradeConfig.getBuyLowerLimit() >= tradeConfig.getBuyUpperLimit()){
              throw new PriceConfigurationException("Buy/Sell limits are not configured correctly.");
         }
 
-        BuyRequest request = createBuyRequest(tradePosition);
-        ResponseEntity<BuyResponse> response = restTemplate.postForEntity(getBuyUrl(), request, BuyResponse.class);
-
-        if(response.getStatusCode().equals(HttpStatus.OK)){
-            tradePosition.setPositionId(response.getBody().getPositionId());
-            tradeRepository.save(tradePosition);
-            log.info("Buy Order Successful. Product {}, Buy Price {}, Upper Limit {}, Lower Limit {}  ",
-                    tradePosition.getProductId(), tradePosition.getBuyPrice(), buyUpperLimit, buyLowerLimit);
-        }
-        return response.getBody();
+        BuyResponse buyResponse = tradeController.buyOrder(tradePosition);
+        tradePosition.setPositionId(buyResponse.getPositionId());
+        tradeRepository.save(tradePosition);
+        log.info("Buy Order Successful. Product {}, Buy Price {}, Upper Limit {}, Lower Limit {}  ",
+                tradePosition.getProductId(), tradePosition.getBuyPrice(), tradeConfig.getBuyUpperLimit(), tradeConfig.getBuyLowerLimit());
     }
 
-    private SellResponse sellOrder(TradePosition tradePosition){
-        ResponseEntity<SellResponse> response = restTemplate.exchange(
-                getSellUrl(tradePosition.getPositionId()), HttpMethod.DELETE, null, SellResponse.class);
-
-        //TODO API Exception handling
-        if(response.getStatusCode().equals(HttpStatus.OK)){
-            tradeRepository.delete(tradePosition);
-            log.info("Sell Order Successful. Product {}, Buy Price {} , Current Price {}",
-                    tradePosition.getProductId(), tradePosition.getBuyPrice(), response.getBody().getPrice().getAmount());
-        }
-        return response.getBody();
+    private void sellOrder(TradePosition tradePosition){
+        SellResponse sellResponse = tradeController.sellOrder(tradePosition);
+        tradeRepository.delete(tradePosition);
+        log.info("Sell Order Successful. Product {}, Buy Price {} , Current Price {}",
+                tradePosition.getProductId(), tradePosition.getBuyPrice(), sellResponse.getPrice().getAmount());
     }
 
-    private BuyRequest createBuyRequest(TradePosition tradePosition){
-        return BuyRequest.builder()
-                .productId(tradePosition.getProductId())
-                .investingAmount(new Amount("BUX", 2, tradeSize))
-                .leverage(2)
-                .direction(Direction.BUY)
-                .source(new Source("OTHER"))
-                .build();
-    }
-
-    private String getBuyUrl(){
-        return apiUrl + BUY_ENDPOINT;
-    }
-
-    private String getSellUrl(String positionId){
-        return apiUrl + SELL_ENDPOINT + positionId;
-    }
 
     private TradePosition createTradePosition(TradeQuote tradeQuote){
-        return new TradePosition(tradeQuote.getSecurityId(), tradeQuote.getCurrentPrice(), buyUpperLimit, buyLowerLimit);
+        return new TradePosition(tradeQuote.getSecurityId(), tradeQuote.getCurrentPrice(), tradeConfig.getBuyUpperLimit(),
+                tradeConfig.getBuyLowerLimit(), tradeConfig.getBuyAmount());
     }
 }

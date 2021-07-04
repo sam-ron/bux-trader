@@ -1,7 +1,6 @@
 package com.bux.trader.websocket;
 
-import com.bux.trader.config.exception.PriceConfigurationException;
-import com.bux.trader.entity.rest.TradeQuote;
+import com.bux.trader.rest.entity.TradeQuote;
 import com.bux.trader.service.SubscriptionService;
 import com.bux.trader.service.TradeService;
 import com.google.gson.Gson;
