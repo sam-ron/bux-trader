@@ -27,7 +27,3 @@ http://localhost:8080/h2-console/
 
 -To run from the command line use: **mvn spring-boot:run**
 
-**The *master-refactored* branch was created as I was doing some refactoring at the weekend while 
-the markets were closed and I was having issues using the local bux-server (which was working for 
-me previously). As I wasn't actually able to verify my refactored code against BUX servers, I left 
-it on another branch**

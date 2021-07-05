@@ -1,4 +1,4 @@
-package com.bux.trader.entity.rest;
+package com.bux.trader.rest.entity;
 
 public class Product {
     private String securityId;

@@ -1,4 +1,4 @@
-package com.bux.trader.entity.rest;
+package com.bux.trader.rest.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

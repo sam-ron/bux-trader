@@ -1,6 +1,5 @@
-package com.bux.trader.entity.repository;
+package com.bux.trader.repository.entity;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,12 +18,14 @@ public class TradePosition {
     private Float buyPrice;
     private Float upperLimit;
     private Float lowerLimit;
+    private Double buyAmount;
 
-    public TradePosition(String productId, Float buyPrice, Float upperLimit, Float lowerLimit) {
+    public TradePosition(String productId, Float buyPrice, Float upperLimit, Float lowerLimit, Double buyAmount) {
         this.productId = productId;
         this.buyPrice = buyPrice;
         this.upperLimit = upperLimit;
         this.lowerLimit = lowerLimit;
+        this.buyAmount = buyAmount;
     }
 
 }
